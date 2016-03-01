@@ -13,6 +13,7 @@ class ViewController: UIViewController, LVVideoRangeSliderDelegate {
     @IBOutlet weak var videoRangeSlider : LYVideoRangeSlider!
     @IBOutlet weak var previewView : UIView!
     
+    var seekFinish : Bool = true
     var playerLayer : AVPlayerLayer?
     var player : AVPlayer?
     var playerItem : AVPlayerItem?
@@ -70,8 +71,11 @@ class ViewController: UIViewController, LVVideoRangeSliderDelegate {
 
     func timeRangeDidChanged(timeRange: CMTimeRange) {
         let start = timeRange.start
-        if player != nil {
-            player!.seekToTime(start, toleranceBefore: CMTimeMake(1, 30), toleranceAfter: CMTimeMake(1, 30))
+        if player != nil && self.seekFinish {
+            self.seekFinish = false
+            player!.seekToTime(start, toleranceBefore: CMTimeMake(1, 30), toleranceAfter: CMTimeMake(1, 30), completionHandler: { (finished) -> Void in
+                self.seekFinish = true
+            })
         }
     }
     
@@ -80,7 +84,9 @@ class ViewController: UIViewController, LVVideoRangeSliderDelegate {
         let endTime = CMTimeRangeGetEnd(timeRange)
         if playerItem != nil {
             playerItem!.forwardPlaybackEndTime = endTime
-            player!.seekToTime(startTime, toleranceBefore: CMTimeMake(1, 30), toleranceAfter: CMTimeMake(1, 30))
+            player!.seekToTime(startTime, toleranceBefore: CMTimeMake(1, 30), toleranceAfter: CMTimeMake(1, 30), completionHandler: { (finished) -> Void in
+                self.seekFinish = true
+            })
         }
     }
     

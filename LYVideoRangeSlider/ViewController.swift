@@ -14,13 +14,16 @@ class ViewController: UIViewController, LVVideoRangeSliderDelegate {
     @IBOutlet weak var previewView : UIView!
     
     var playerLayer : AVPlayerLayer?
-    
     var player : AVPlayer?
+    var playerItem : AVPlayerItem?
+    var startTime : CMTime = kCMTimeInvalid
 
     override func viewDidLoad() {
         super.viewDidLoad()
         videoRangeSlider.delegate = self
         // Do any additional setup after loading the view, typically from a nib.
+        self.previewView.userInteractionEnabled = true
+        self.previewView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: "tapHandler:"))
     }
 
     override func didReceiveMemoryWarning() {
@@ -37,9 +40,12 @@ class ViewController: UIViewController, LVVideoRangeSliderDelegate {
             playerLayer.frame = previewView.bounds
             previewView.layer.addSublayer(playerLayer)
             self.playerLayer = playerLayer
+            
+            NSNotificationCenter.defaultCenter().addObserver(self, selector: "playerDidReachEnd:", name: AVPlayerItemDidPlayToEndTimeNotification, object: nil)
         } else {
             player!.replaceCurrentItemWithPlayerItem(playerItem)
         }
+        self.playerItem = playerItem
         
         videoRangeSlider!.setupVideoAsset(videoAsset, timeRange: videoAsset.timeRange, minClipDuration: -1, maxClipDuration: 4)
     }
@@ -57,6 +63,8 @@ class ViewController: UIViewController, LVVideoRangeSliderDelegate {
             player!.replaceCurrentItemWithPlayerItem(playerItem)
         }
         
+        self.playerItem = playerItem
+        
         videoRangeSlider!.setupVideoAsset(videoAsset, timeRange: videoAsset.timeRange, minClipDuration: -1, maxClipDuration: 2)
     }
 
@@ -66,5 +74,32 @@ class ViewController: UIViewController, LVVideoRangeSliderDelegate {
             player!.seekToTime(start, toleranceBefore: CMTimeMake(1, 30), toleranceAfter: CMTimeMake(1, 30))
         }
     }
+    
+    func timeRangeDidConfirm(timeRange: CMTimeRange) {
+        startTime = timeRange.start
+        let endTime = CMTimeRangeGetEnd(timeRange)
+        if playerItem != nil {
+            playerItem!.forwardPlaybackEndTime = endTime
+            player!.seekToTime(startTime, toleranceBefore: CMTimeMake(1, 30), toleranceAfter: CMTimeMake(1, 30))
+        }
+    }
+    
+    func playerDidReachEnd(noti : NSNotification) {
+        if CMTIME_IS_VALID(startTime) && player != nil {
+            player!.seekToTime(startTime, toleranceBefore: CMTimeMake(1, 30), toleranceAfter: CMTimeMake(1, 30))
+            player!.play()
+        }
+    }
+    
+    func tapHandler(tap : UITapGestureRecognizer) {
+        if player != nil {
+            if player!.rate != 0.0 {
+                player!.pause()
+            } else {
+                player!.play()
+            }
+        }
+    }
+    
 }
 

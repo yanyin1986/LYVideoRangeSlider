@@ -11,6 +11,7 @@ import UIKit
 
 protocol LVVideoRangeSliderDelegate : NSObjectProtocol {
     func timeRangeDidChanged(timeRange : CMTimeRange)
+    func timeRangeDidConfirm(timeRange : CMTimeRange)
 }
 
 class LYVideoRangeSlider: UIView, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -310,6 +311,12 @@ class LYVideoRangeSlider: UIView, UICollectionViewDataSource, UICollectionViewDe
         }
     }
     
+    private func _notiRangeConfirm() {
+        if delegate != nil && delegate!.respondsToSelector("timeRangeDidConfirm:") {
+            delegate!.timeRangeDidConfirm(timeRange)
+        }
+    }
+    
     func _leftSliderMoved(pan : UIPanGestureRecognizer) {
         switch(pan.state) {
         case .Began:
@@ -341,8 +348,9 @@ class LYVideoRangeSlider: UIView, UICollectionViewDataSource, UICollectionViewDe
             _adjustStartAndLength()
             _notiRangeChanged()
             break
-        case .Ended:
+        case .Ended, .Cancelled, .Failed:
             _leftPanStartPoint = CGPointZero
+            _notiRangeConfirm()
             break
         default:
             break
@@ -375,8 +383,9 @@ class LYVideoRangeSlider: UIView, UICollectionViewDataSource, UICollectionViewDe
             _adjustStartAndLength()
             _notiRangeChanged()
             break
-        case .Ended:
+        case .Ended, .Cancelled, .Failed:
             _rightPanStartPoint = CGPointZero
+            _notiRangeConfirm()
             break
         default:
             break
@@ -404,8 +413,9 @@ class LYVideoRangeSlider: UIView, UICollectionViewDataSource, UICollectionViewDe
             _adjustStartAndLength()
             _notiRangeChanged()
             break
-        case .Ended:
+        case .Ended, .Cancelled, .Failed:
             _rangePanStartPoint = CGPointZero
+            _notiRangeConfirm()
             break
         default:
             break

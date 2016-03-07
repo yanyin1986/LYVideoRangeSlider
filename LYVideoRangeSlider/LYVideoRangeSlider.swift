@@ -105,7 +105,7 @@ class LYVideoRangeSlider: UIView, UICollectionViewDataSource, UICollectionViewDe
                     _maxClipWidth = CGFloat(self.maxClipDuration) * widthPerSeconds
                 }
                 
-                if self.minClipDuration > 0 && duration < self.minClipDuration {
+                if self.minClipDuration > 0 && duration > self.minClipDuration {
                     duration = self.minClipDuration
                     _minClipWidth = CGFloat(self.minClipDuration) * widthPerSeconds
                 }
@@ -340,9 +340,20 @@ class LYVideoRangeSlider: UIView, UICollectionViewDataSource, UICollectionViewDe
                 }
             }
             
+            let minWidth = max(_minClipWidth, _leftSlider!.bounds.size.width + _rightSlider!.bounds.size.width)
+            
+            if newWidth < minWidth {
+                newWidth = minWidth
+            }
+            
             if newX + newWidth > self.frame.size.width {
                 newWidth = self.frame.size.width - newX
+                if newWidth < minWidth {
+                    newWidth = minWidth
+                    newX = self.frame.size.width - newWidth
+                }
             }
+           
             
             _rangeView!.frame = CGRectMake(newX, 0, newWidth, _rangeView!.frame.size.height)
             _adjustStartAndLength()
@@ -379,7 +390,19 @@ class LYVideoRangeSlider: UIView, UICollectionViewDataSource, UICollectionViewDe
                 width = _maxClipWidth
             }
             
-            _rangeView!.frame = CGRectMake(right - width, _rangeView!.frame.origin.y, width, _rangeView!.frame.size.height)
+            let minWidth = max(_minClipWidth, _leftSlider!.bounds.size.width + _rightSlider!.bounds.size.width)
+            
+            if width < minWidth {
+                width = minWidth
+            }
+            
+            var newX = right - width
+            if newX < 0 {
+                newX = 0
+                right = width
+            }
+            
+            _rangeView!.frame = CGRectMake(newX, _rangeView!.frame.origin.y, width, _rangeView!.frame.size.height)
             _adjustStartAndLength()
             _notiRangeChanged()
             break

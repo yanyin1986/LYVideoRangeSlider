@@ -48,7 +48,7 @@ class ViewController: UIViewController, LVVideoRangeSliderDelegate {
         }
         self.playerItem = playerItem
         
-        videoRangeSlider!.setupVideoAsset(videoAsset, timeRange: videoAsset.timeRange, minClipDuration: -1, maxClipDuration: 4)
+        videoRangeSlider!.setupVideoAsset(videoAsset, timeRange: videoAsset.timeRange, minClipDuration: 2, maxClipDuration: 4)
     }
     
     @IBAction func addAsset2() {
@@ -66,7 +66,7 @@ class ViewController: UIViewController, LVVideoRangeSliderDelegate {
         
         self.playerItem = playerItem
         
-        videoRangeSlider!.setupVideoAsset(videoAsset, timeRange: videoAsset.timeRange, minClipDuration: -1, maxClipDuration: 2)
+        videoRangeSlider!.setupVideoAsset(videoAsset, timeRange: videoAsset.timeRange, minClipDuration: 2, maxClipDuration: 3)
     }
 
     func timeRangeDidChanged(timeRange: CMTimeRange) {
